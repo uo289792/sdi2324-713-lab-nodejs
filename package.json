@@ -1,0 +1,13 @@
+{
+  "name": "music_store",
+  "version": "1.0.0",
+  "description": "\"Tienda de música\"",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uo289792/sdi2324-713-lab-nodejs.git"
+  },
+  "private": true
+}
