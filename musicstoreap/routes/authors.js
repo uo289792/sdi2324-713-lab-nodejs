@@ -1,19 +1,20 @@
 module.exports = function(app) {
 
+    let authors = [{
+        "name": "Alex Turner",
+        "group": "Arctic Monkeys",
+        "role": "cantante"
+    }, {
+        "name": "Angus Young",
+        "group": "AC/DC",
+        "role": "guitarrista"
+    }, {
+        "name": "Adam Levine",
+        "group": "Maroon 5",
+        "role": "cantante"
+    }];
+
     app.get("/authors", function(req, res) {
-        let authors = [{
-            "name": "Alex Turner",
-            "group": "Arctic Monkeys",
-            "role": "cantante"
-        }, {
-            "name": "Angus Young",
-            "group": "AC/DC",
-            "role": "guitarrista"
-        }, {
-            "name": "Adam Levine",
-            "group": "Maroon 5",
-            "role": "cantante"
-        }];
 
         let response = {
             seller: "Autores",
@@ -67,6 +68,16 @@ module.exports = function(app) {
         res.send(response);
     });
 
+    app.get("/authors/filter/:role", function (req, res) {
+
+        let filteredList = authors.filter(author => author.role.toLowerCase().trim() === req.params.role.toLowerCase().trim());
+
+        let response = {
+            seller: "Autores",
+            authors: filteredList
+        };
+        res.render("authors/authors.twig", response);
+    });
 
     app.get("/authors*", function(req, res) {
         res.redirect("/authors");
