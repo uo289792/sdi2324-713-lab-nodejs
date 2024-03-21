@@ -1,6 +1,7 @@
 const {ObjectId} = require("mongodb");
 module.exports = function(app, songsRepository)   {
 
+
     app.get('/shop', function (req, res) {
         let filter = {};
         let options = {sort: { title: 1}};
@@ -40,6 +41,8 @@ module.exports = function(app, songsRepository)   {
     app.get('/songs/add', function (req, res) {
         res.render("songs/add.twig");
     });
+
+
 
     app.get("/songs/edit/:id", function (req, res) {
         let filter = {_id: new ObjectId(req.params.id)};

@@ -40,17 +40,22 @@ app.use("/songs/add",userSessionRouter);
 app.use("/songs/edit",userSessionRouter);
 app.use("/publications",userSessionRouter);
 app.use("/audios/",userAudiosRouter);
-app.use("/shop/",userSessionRouter)
+app.use("/shop/",userSessionRouter);
 
 let songsRepository = require("./repositories/songsRepository.js");
 songsRepository.init(app, dbClient)
 
 const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, dbClient);
-require("./routes/users.js")(app, usersRepository);
 
+const favoriteSongsRepository = require("./repositories/favoriteSongsRepository.js");
+favoriteSongsRepository.init(app, dbClient);
+
+require('./routes/songs/favorites.js')(app, favoriteSongsRepository, songsRepository);
+require("./routes/users.js")(app, usersRepository);
 require("./routes/songs.js")(app, songsRepository)
 require('./routes/authors.js')(app);
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
