@@ -41,6 +41,7 @@ app.use("/songs/edit",userSessionRouter);
 app.use("/publications",userSessionRouter);
 app.use("/audios/",userAudiosRouter);
 app.use("/shop/",userSessionRouter);
+app.use("/songs/favorites/",userSessionRouter);
 
 let songsRepository = require("./repositories/songsRepository.js");
 songsRepository.init(app, dbClient)
@@ -52,7 +53,7 @@ const favoriteSongsRepository = require("./repositories/favoriteSongsRepository.
 favoriteSongsRepository.init(app, dbClient);
 
 require('./routes/songs/favorites.js')(app, favoriteSongsRepository, songsRepository);
-require("./routes/users.js")(app, usersRepository);
+require("./routes/users.js")(app, usersRepository, favoriteSongsRepository);
 require("./routes/songs.js")(app, songsRepository)
 require('./routes/authors.js')(app);
 

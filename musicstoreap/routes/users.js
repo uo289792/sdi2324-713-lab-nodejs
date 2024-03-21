@@ -1,4 +1,4 @@
-module.exports = function (app, usersRepository) {
+module.exports = function (app, usersRepository, favoriteSongsRepository) {
   app.get('/users', function (req, res) {
     res.send('lista de usuarios');
   })
@@ -38,7 +38,7 @@ module.exports = function (app, usersRepository) {
         res.send("Usuario no identificado");
       } else {
         req.session.user = user.email;
-        res.send("Usuarioo identificado correctamente: " + user.email);
+        res.redirect("/shop");
       }
     }).catch(error => {
       req.session.user = null;
@@ -47,8 +47,18 @@ module.exports = function (app, usersRepository) {
   });
 
   app.get('/users/logout', function (req, res) {
-    req.session.user = null;
-    res.send("El usuario se ha desconectado correctamente");
+    const filter = { userId: req.session.user.id };
+    favoriteSongsRepository.deleteFavorites(filter, {}).then(result => {
+      if (result === null || result.deletedCount > 0) {
+        req.session.user = null;
+        res.redirect("/users/login");
+      } else {
+        res.send("El usuario se ha desconectado correctamente, pero no se encontraron favoritos asociados.");
+      }
+    }).catch(error => {
+      res.send("Se ha producido un error al intentar eliminar la canción: " + error)
+    });
+
   });
 
 }
