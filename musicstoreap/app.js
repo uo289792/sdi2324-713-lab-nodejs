@@ -33,6 +33,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const { MongoClient } = require("mongodb");
 const connectionStrings = 'mongodb+srv://admin:UO289792@musicstoreapp.0wk9ker.mongodb.net/?retryWrites=true&w=majority&appName=musicstoreapp';
 const dbClient = new MongoClient(connectionStrings);
+
+const userSessionRouter = require('./routes/userSessionRouter');
+const userAudiosRouter = require('./routes/userAudiosRouter');
+app.use("/songs/add",userSessionRouter);
+app.use("/songs/edit",userSessionRouter);
+app.use("/publications",userSessionRouter);
+app.use("/audios/",userAudiosRouter);
+app.use("/shop/",userSessionRouter)
+
 let songsRepository = require("./repositories/songsRepository.js");
 songsRepository.init(app, dbClient)
 
