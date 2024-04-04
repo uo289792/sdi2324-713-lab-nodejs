@@ -36,11 +36,17 @@ const dbClient = new MongoClient(connectionStrings);
 
 const userSessionRouter = require('./routes/userSessionRouter');
 const userAudiosRouter = require('./routes/userAudiosRouter');
+const userAuthorRouter = require('./routes/userAuthorRouter');
 app.use("/songs/add",userSessionRouter);
 app.use("/songs/edit",userSessionRouter);
 app.use("/publications",userSessionRouter);
+app.use("/songs/buy",userSessionRouter);
+app.use("/purchases",userSessionRouter);
 app.use("/audios/",userAudiosRouter);
 app.use("/shop/",userSessionRouter);
+app.use("/songs/favorites/",userSessionRouter);
+app.use("/songs/edit",userAuthorRouter);
+app.use("/songs/delete",userAuthorRouter)
 
 let songsRepository = require("./repositories/songsRepository.js");
 songsRepository.init(app, dbClient)
@@ -52,8 +58,8 @@ const favoriteSongsRepository = require("./repositories/favoriteSongsRepository.
 favoriteSongsRepository.init(app, dbClient);
 
 require('./routes/songs/favorites.js')(app, favoriteSongsRepository, songsRepository);
-require("./routes/users.js")(app, usersRepository);
-require("./routes/songs.js")(app, songsRepository)
+require("./routes/users.js")(app, usersRepository, favoriteSongsRepository);
+require("./routes/songs.js")(app, songsRepository);
 require('./routes/authors.js')(app);
 
 
@@ -77,6 +83,7 @@ app.use(function(req, res, next) {
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
+  console.log("Se ha producido un error " + err)
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
