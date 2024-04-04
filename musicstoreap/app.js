@@ -40,6 +40,8 @@ const userAuthorRouter = require('./routes/userAuthorRouter');
 app.use("/songs/add",userSessionRouter);
 app.use("/songs/edit",userSessionRouter);
 app.use("/publications",userSessionRouter);
+app.use("/songs/buy",userSessionRouter);
+app.use("/purchases",userSessionRouter);
 app.use("/audios/",userAudiosRouter);
 app.use("/shop/",userSessionRouter);
 app.use("/songs/favorites/",userSessionRouter);

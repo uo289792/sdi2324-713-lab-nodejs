@@ -26,10 +26,10 @@
       <ul class="nav navbar-nav">
         <li id="myshop" class="active"><a href="/shop">Tienda</a></li>
         <li id="mypublication"><a href="/publications">Publicaciones</a></li>
-        <li id="mybuy"><a href="/buy">Compras</a></li>
+        <li id="mybuy"><a href="/purchases">Compras</a></li>
      </ul>
       <ul class="nav navbar-nav navbar-right">
-	    <li><a href="/signup"><span class="glyphicon glyphicon-user"></span> Registrate</a></li>
+	    <li><a href="/users/signup"><span class="glyphicon glyphicon-user"></span> Registrate</a></li>
         <li><a href="/users/login"><span class="glyphicon glyphicon-log-in"></span> Identifícate</a></li>
       </ul>
     </div>
@@ -37,31 +37,22 @@
 </nav>
 
 <div class="container">
-
-	<!-- Contenido -->
-	{% block main_container %}
-     <!-- Posible contenido por defecto -->
-    {% endblock %}
-
-    <div class="container">
-        <script>
-            let params = new URLSearchParams(location.search);
-            let message = params.get("message");
-            let messageType = params.get("messageType");
-            if (message !== null && message !== "") {
-                if (messageType === "") {
-                    messageType = 'alert-info';
-                }
-                $(".container")
-                    .append("<div class='alert " + messageType + "'>" + message + " </div>");
+    <script>
+        let params = new URLSearchParams(location.search);
+        let message = params.get("message");
+        let messageType = params.get("messageType");
+        if (message !== null && message !== "") {
+            if (messageType === "") {
+                messageType = 'alert-info';
             }
-        </script>
-        <!-- Contenido -->
-        {% block main_container %}
-            <!-- Posible contenido por defecto -->
-        {% endblock %}
-    </div
-
+            $(".container")
+                .append("<div class='alert " + messageType + "'>" + message + " </div>");
+        }
+    </script>
+    <!-- Contenido -->
+    {% block main_container %}
+        <!-- Posible contenido por defecto -->
+    {% endblock %}
 </div>
 
 </body>
