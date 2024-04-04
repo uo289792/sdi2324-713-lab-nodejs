@@ -57,7 +57,7 @@ favoriteSongsRepository.init(app, dbClient);
 
 require('./routes/songs/favorites.js')(app, favoriteSongsRepository, songsRepository);
 require("./routes/users.js")(app, usersRepository, favoriteSongsRepository);
-require("./routes/songs.js")(app, songsRepository)
+require("./routes/songs.js")(app, songsRepository);
 require('./routes/authors.js')(app);
 
 
