@@ -124,7 +124,20 @@ module.exports = function(app, songsRepository)   {
         let user = req.session.user;
         songsRepository.findSong(filter, options).then(song => {
             userCanBuy(user, song._id).then(canBuy => {
-                res.render("songs/song.twig", {song: song, canBuy: canBuy});
+                let settings = {
+                    url: "https://api.currencyapi.com/v3/latest?apikey=cur_live_OMnjTXLlHpgd3RDjdNdRhEyYtwD8TUG5JEIwO8Hh&base_currency=EUR&currencies=USD",
+                    method: "get",
+                }
+                let rest = app.get("rest");
+                rest(settings, function (error, response, body) {
+                    console.log("cod: " + response.statusCode + " Cuerpo :" + body);
+                    let responseObject = JSON.parse(body);
+                    let rateUSD = responseObject.data.USD.value;
+                    // nuevo campo "usd" redondeado a dos decimales
+                    let songValue = song.price / rateUSD
+                    song.usd = Math.round(songValue * 100) / 100
+                    res.render("songs/song.twig", {song: song, canBuy: canBuy});
+                });
             });
         }).catch(error => {
             res.send("Se ha producido un error al buscar la canción " + error)

@@ -14,7 +14,7 @@
 			 <p>{{song.kind}}</p>
 			  {%  if canBuy %}
 				  <form class="form-horizontal" method="post" action="/songs/buy/{{ song._id }}">
-					  <button type="submit" class="btn btn-primary">Comprar: {{ song.price }}€</button>
+					  <button type="submit" class="btn btn-primary">Comprar: {{ song.price }} € - {{ song.usd }} $</button>
 				  </form>
 			  {% else %}
 				  <audio controls>
