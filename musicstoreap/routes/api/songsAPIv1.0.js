@@ -1,4 +1,6 @@
 const {ObjectId} = require("mongodb");
+const {validatorResult} = require("express-validator")
+const {songsValidator} = require('./songsValidator')
 module.exports = function (app, songsRepository, usersRepository) {
     app.get("/api/v1.0/songs", function (req, res) {
         let filter = {};
@@ -18,29 +20,40 @@ module.exports = function (app, songsRepository, usersRepository) {
                 title: req.body.title,
                 kind: req.body.kind,
                 price: req.body.price,
-                author: req.session.user
+                author: res.user
             }
-            // Validar aquí: título, género, precio y autor.
-            songsRepository.insertSong(song, function (songId) {
-                if (songId === null) {
-                    res.status(409);
-                    res.json({error: "No se ha podido crear la canción. El recurso ya existe."});
+            validatorInsertSong(song, function (errors) {
+                if (errors !== null && errors.length > 0) {
+                    res.status(422);
+                    res.json({errors: errors});
                 } else {
-                    res.status(201);
-                    res.json({
-                        message: "Canción añadida correctamente.",
-                        _id: songId
-                    })
+                    songsRepository.insertSong(song, function (songId) {
+                        if (songId === null) {
+                            res.status(409);
+                            res.json({error: "No se ha podido crear la canción. El recurso ya existe."});
+                        } else {
+                            res.status(201);
+                            res.json({
+                                message: "Canción añadida correctamente.",
+                                _id: songId
+                            })
+                        }
+                    });
                 }
             });
         } catch (e) {
             res.status(500);
             res.json({error: "Se ha producido un error al intentar crear la canción: " + e})
         }
-    }) ;
+    });
 
-    app.put('/api/v1.0/songs/:id', function (req, res) {
+    app.put('/api/v1.0/songs/:id',songsValidator,function (req, res) {
         try {
+            let errors = validatorResult(req);
+            if(!errors.isEmpty) {
+                res.status(402);
+                res.json({errors: errors.array()});
+            }
             let songId = new ObjectId(req.params.id);
             let filter = {_id: songId};
             //Si la _id NO no existe, no crea un nuevo documento.
@@ -106,23 +119,30 @@ module.exports = function (app, songsRepository, usersRepository) {
 
     app.delete('/api/v1.0/songs/:id', function (req, res) {
         try {
-            let songId = new ObjectId(req.params.id)
+            let songId = ObjectId(req.params.id)
             let filter = {_id: songId}
-            songsRepository.deleteSong(filter, {}).then(result => {
-                if (result === null || result.deletedCount === 0) {
-                    res.status(404);
-                    res.json({error: "ID inválido o no existe, no se ha borrado el registro."});
+            isUserAuthorOf(res.user, songId).then(isAuthor => {
+                if (isAuthor) {
+                    songsRepository.deleteSong(filter, {}).then(result => {
+                        if (result === null || result.deletedCount === 0) {
+                            res.status(404);
+                            res.json({error: "ID inválido o no existe, no se ha borrado el registro."});
+                        } else {
+                            res.status(200);
+                            res.send(JSON.stringify(result));
+                        }
+                    }).catch(error => {
+                        res.status(500);
+                        res.json({error: "Se ha producido un error al eliminar la canción."})
+                    });
                 } else {
-                    res.status(200);
-                    res.send(JSON.stringify(result));
+                    res.status(500);
+                    res.json({errors: "El usuario no es el autor de la canción que se intenta eliminar."})
                 }
-            }).catch(error => {
-                res.status(500);
-                res.json({error: "Se ha producido un error al eliminar la canción."})
-            });
+            })
         } catch (e) {
             res.status(500);
-            res.json({error: "Se ha producido un error, revise que el ID sea válido."})
+            res.json({errors: "Se ha producido un error, revise que el ID sea válido."})
         }
     });
 
@@ -165,5 +185,46 @@ module.exports = function (app, songsRepository, usersRepository) {
             })
         }
     });
+
+    async function isUserAuthorOf(user, songId) {
+        let filter = {$and: [{'_id': songId}, {'author': user}]};
+        let options = {};
+        let songs = await songsRepository.getSongs(filter, options);
+        return songs !== null && songs.length > 0;
+    }
+
+    function validatorInsertSong(song, callbackFunction) {
+        let errors = [];
+        if (song.title === null || typeof song.title === "undefined" || song.title.trim().toString().length === 0) {
+            errors.push({
+                "value": song.title,
+                "message": "El título no puede estar vacío.",
+                "param": "title",
+                "location": "body"
+            })
+        }
+        if (song.kind === null || typeof song.kind === "undefined" || song.kind.trim().toString().length === 0) {
+            errors.push({
+                "value": song.kind,
+                "message": "El genero no puede estar vacío.",
+                "param": "kind",
+                "location": "body"
+            })
+        }
+        if (song.price === null || typeof song.price === 'undefined' || song.price < 0 || song.price === '') {
+            errors.push({
+                "value": song.price,
+                "message": 'El precio debe ser positivo.',
+                "param": "price",
+                "location": "body"
+            });
+        }
+
+        if (errors.length <= 0) {
+            callbackFunction(null);
+        } else {
+            callbackFunction(errors);
+        }
+    }
 
 }
